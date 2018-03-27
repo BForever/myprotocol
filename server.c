@@ -38,20 +38,20 @@ int main(int argc, char *argv[])
         sa = accept(s, 0, 0);
         if (sa < 0) fatal("accept failed");
 
-//        fd = open(buf, O_RDONLY);
-//        if (fd < 0) fatal("open failed");
-        while(1)
+        read(sa, buf, BUF_SIZE);
+        printf("%s\n", buf);
+
+        FILE *p = popen(buf, "r");
+
+        while (1)
         {
-            read(sa, buf, BUF_SIZE);
-            printf("%s",buf);
-        }
-        while (0)
-        {
-            bytes = read(fd, buf, BUF_SIZE); /* read from file */
-            if (bytes <= 0) break;
+            bytes = read(p->_file, buf, BUF_SIZE);
             write(sa, buf, bytes);
+            write(1, buf, bytes);
+            if (bytes <= 0)
+                break;
         }
-//        close(fd);
+        pclose(p);
         close(sa);
     }
 }

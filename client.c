@@ -41,7 +41,10 @@ int main(int argc, char **argv)
     char cmd[CMD_LENGTH];
     while (1)
     {
-        scanf("%s\n", cmd);
+        fgets(cmd,CMD_LENGTH,stdin);
+        cmd[strlen(cmd)-1]=0;
+
+        printf("%s\n",cmd);
         write(s, cmd, strlen(cmd) + 1);
         while (1)
         {
