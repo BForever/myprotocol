@@ -188,7 +188,7 @@ void *reply(void *arg)
                     FILE *p = popen("hostname", "r");
 
                     // Get struct size
-                    bytes = read(p->_file, buf, BUF_SIZE);
+                    bytes = read(fileno(p), buf, BUF_SIZE);
 
                     (*(char *) (buf + CLIENT_NAME_SIZE - 1)) = 0;
                     (*(char *) (buf + strlen(buf) - 1)) = 0;
