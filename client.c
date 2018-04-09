@@ -260,7 +260,7 @@ void *listen_msg(void *psocket)
             read(s, &info, sizeof(struct socketinfo));
             read(s, buf, data.length);
             buf[data.length] = 0;// For safety
-            printf("Received message from client %d: %s(%s:%d)\n", info.sa, info.name, info.ip, info.port);
+            printf("Message from client %d: %s(%s:%d)\n", info.sa, info.name, info.ip, info.port);
             printf("%s\n[client]", buf);
             fflush(stdout);
         }

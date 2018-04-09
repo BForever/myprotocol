@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
         char* ip = inet_ntoa(addr.sin_addr);
         memcpy(newclient->info.ip,inet_ntoa(addr.sin_addr),strlen(ip));
         newclient->info.port=ntohs(addr.sin_port);
+        printf("new connection from %s:%d\n",newclient->info.ip,newclient->info.port);
 
 
 //        printf("new connection\n");
