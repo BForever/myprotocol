@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
         // Get ip address
         struct sockaddr_in addr;
         memset(&addr,0,sizeof(addr));
-        int len = sizeof(addr);
+        unsigned int len = sizeof(addr);
         getsockname(newclient->info.sa,(struct sockaddr*)&addr,&len);
         char* ip = inet_ntoa(addr.sin_addr);
         memcpy(newclient->info.ip,inet_ntoa(addr.sin_addr),strlen(ip));
