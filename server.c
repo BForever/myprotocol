@@ -14,7 +14,7 @@
 #define SERVER_PORT 2277
 #define BUF_SIZE 4096
 #define QUEUE_SIZE 10
-#define CLIENT_NAME_SIZE 50
+#define CLIENT_NAME_SIZE 32
 
 enum msg_type
 {
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
         unsigned int len = sizeof(addr);
         getsockname(newclient->info.sa,(struct sockaddr*)&addr,&len);
         char* ip = inet_ntoa(addr.sin_addr);
+        ip[15]=0;
         memcpy(newclient->info.ip,inet_ntoa(addr.sin_addr),strlen(ip));
         newclient->info.port=ntohs(addr.sin_port);
         printf("new connection from %s:%d\n",newclient->info.ip,newclient->info.port);
@@ -305,10 +306,13 @@ void *reply(void *arg)
                 pthread_mutex_lock(this->mutex);
                 Data data;
                 data.type = MESSAGE;
-                data.length = strlen(this->message);
+                data.length = strlen(this->message)+1;
+                write(sa, &data, sizeof(Data));
+                write(sa, this->message, data.length);
+                data.length= sizeof(struct socketinfo);
                 write(sa, &data, sizeof(Data));
                 write(sa,this->buf, sizeof(struct socketinfo));
-                write(sa, this->message, data.length);
+
                 this->mesflag = 0;
                 pthread_mutex_unlock(this->mutex);
             }

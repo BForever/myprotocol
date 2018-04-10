@@ -13,7 +13,7 @@
 #define SERVER_PORT 2277
 #define BUF_SIZE 4096
 #define CMD_LENGTH 200
-#define CLIENT_NAME_SIZE 50
+#define CLIENT_NAME_SIZE 32
 
 enum msg_type
 {
@@ -197,11 +197,11 @@ int main(int argc, char **argv)
                     printf("[client] Write the message you want to send and enter:\n");
                     scanf("%s", cmd);
 
-                    data.length = strlen(cmd) + sizeof(int);
+                    data.length = strlen(cmd) + sizeof(int)+1;
                     *(int *) buf = id;
                     memcpy(buf + sizeof(int), cmd, data.length);
                     write(s, &data, sizeof(Data));
-                    write(s, buf, data.length + sizeof(int));
+                    write(s, buf, data.length);
 //                printf("req sent\n");
                     read(s, &data, sizeof(Data));
                     if (data.length)
@@ -257,8 +257,17 @@ void *listen_msg(void *psocket)
         {
             struct socketinfo info;
             // Get msg
-            read(s, &info, sizeof(struct socketinfo));
             read(s, buf, data.length);
+            read(s, &data, sizeof(Data));
+            read(s, &info, data.length);
+            if(data.length!= sizeof(info))
+            {
+                fatal("data length are not the same, abort message.");
+                setblocking(s, 1);
+                pthread_mutex_unlock(&msg_mutex);
+                usleep(5000);
+                continue;
+            }
             buf[data.length] = 0;// For safety
             printf("Message from client %d: %s(%s:%d)\n", info.sa, info.name, info.ip, info.port);
             printf("%s\n[client]", buf);
