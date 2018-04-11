@@ -45,6 +45,18 @@ struct clientrecord
     Client next;
 };
 
+void *quit(void *arg)
+{
+    char cmd[20];
+    while (1)
+    {
+        scanf("%s", cmd);
+        if (!strcasecmp(cmd, "exit"))
+        {
+            exit(0);
+        }
+    }
+}
 
 void fatal(char *);
 
@@ -79,6 +91,8 @@ int main(int argc, char *argv[])
     l = listen(s, QUEUE_SIZE); /* specify queue size */
     if (l < 0) fatal("[server] listen failed");
 
+    pthread_t quit_t;
+    pthread_create(&quit_t,NULL,quit,NULL);
     while (1)
     {
 //        printf("malloc client.\n");
@@ -88,14 +102,15 @@ int main(int argc, char *argv[])
 
         // Get ip address
         struct sockaddr_in addr;
-        memset(&addr,0,sizeof(addr));
+        memset(&addr, 0, sizeof(addr));
         unsigned int len = sizeof(addr);
-        getsockname(newclient->info.sa,(struct sockaddr*)&addr,&len);
-        char* ip = inet_ntoa(addr.sin_addr);
-        ip[15]=0;
-        memcpy(newclient->info.ip,inet_ntoa(addr.sin_addr),strlen(ip));
-        newclient->info.port=ntohs(addr.sin_port);
-        printf("new connection from %s:%d\n",newclient->info.ip,newclient->info.port);
+        getsockname(newclient->info.sa, (struct sockaddr *) &addr, &len);
+        char *ip = inet_ntoa(addr.sin_addr);
+        ip[15] = 0;
+        memcpy(newclient->info.ip, inet_ntoa(addr.sin_addr), strlen(ip));
+        newclient->info.port = ntohs(addr.sin_port);
+        printf("new connection from %s:%d\n", newclient->info.ip, newclient->info.port);
+
 
 
 //        printf("new connection\n");
@@ -129,7 +144,7 @@ int main(int argc, char *argv[])
             headcnt++;
             pthread_mutex_unlock(&head_mutex);
             // Start new thread
-            printf("[server] new connection from %s, id %d assigned.\n",newclient->info.name,newclient->info.sa);
+            printf("[server] new connection from %s, id %d assigned.\n", newclient->info.name, newclient->info.sa);
             pthread_create(&newclient->tid, NULL, reply, (void *) newclient);
         }
     }
@@ -222,7 +237,7 @@ void *reply(void *arg)
                 }
                 case MESSAGE:
                 {
-                    data.type=REPLY;
+                    data.type = REPLY;
                     read(sa, buf, data.length);
                     int target = *(int *) buf;
                     char *text = buf + sizeof(int);
@@ -243,17 +258,17 @@ void *reply(void *arg)
                             pthread_mutex_lock(tmp->mutex);
                         }
                         memcpy(tmp->message, text, data.length);
-                        memcpy(tmp->buf,&this->info, sizeof(struct socketinfo));
+                        memcpy(tmp->buf, &this->info, sizeof(struct socketinfo));
                         tmp->mesflag = 1;
                         pthread_mutex_unlock(tmp->mutex);
 
-                        data.length=1;
-                        write(sa,&data, sizeof(Data));
+                        data.length = 1;
+                        write(sa, &data, sizeof(Data));
                     } else
                     {
                         // Client not found, reply negative
-                        data.length=0;
-                        write(sa,&data, sizeof(Data));
+                        data.length = 0;
+                        write(sa, &data, sizeof(Data));
                     }
                     break;
                 }
@@ -264,7 +279,7 @@ void *reply(void *arg)
         } else if (!bytes)
         {
             // Connection lost
-            printf("[server] %d:%s lost connection.\n", this->info.sa,this->info.name);
+            printf("[server] %d:%s lost connection.\n", this->info.sa, this->info.name);
             pthread_mutex_lock(&head_mutex);
             Client tmp = head;
             Client prev;
@@ -306,12 +321,12 @@ void *reply(void *arg)
                 pthread_mutex_lock(this->mutex);
                 Data data;
                 data.type = MESSAGE;
-                data.length = strlen(this->message)+1;
+                data.length = strlen(this->message) + 1;
                 write(sa, &data, sizeof(Data));
                 write(sa, this->message, data.length);
-                data.length= sizeof(struct socketinfo);
+                data.length = sizeof(struct socketinfo);
                 write(sa, &data, sizeof(Data));
-                write(sa,this->buf, sizeof(struct socketinfo));
+                write(sa, this->buf, sizeof(struct socketinfo));
 
                 this->mesflag = 0;
                 pthread_mutex_unlock(this->mutex);
