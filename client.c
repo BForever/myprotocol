@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 
         while (1)
         {
-            if(quit)break;
+            if (quit)break;
             pthread_mutex_unlock(&msg_mutex);
             printf("\n ------------------------------------------- \n");
             printf("| Choose what you want to do:               |\n");
@@ -148,7 +148,8 @@ int main(int argc, char **argv)
                     read(s, buf, (size_t) data.length);
 //                printf("time recved\n");
                     struct tm *tp = (struct tm *) buf;
-                    printf("[client] Server time: %02d:%02d:%02d %02d/%02d/%4d\n", tp->tm_hour, tp->tm_min, tp->tm_sec,
+                    printf("[client] Server time: %02d:%02d:%02d %02d/%02d/%4d\n", tp->tm_hour, tp->tm_min,
+                           tp->tm_sec,
                            tp->tm_mday,
                            1 + tp->tm_mon, 1900 + tp->tm_year);
                     break;
@@ -197,7 +198,7 @@ int main(int argc, char **argv)
                     printf("[client] Write the message you want to send and enter:\n");
                     scanf("%s", cmd);
 
-                    data.length = strlen(cmd) + sizeof(int)+1;
+                    data.length = strlen(cmd) + sizeof(int) + 1;
                     *(int *) buf = id;
                     memcpy(buf + sizeof(int), cmd, data.length);
                     write(s, &data, sizeof(Data));
@@ -260,7 +261,7 @@ void *listen_msg(void *psocket)
             read(s, buf, data.length);
             read(s, &data, sizeof(Data));
             read(s, &info, data.length);
-            if(data.length!= sizeof(info))
+            if (data.length != sizeof(info))
             {
                 fatal("data length are not the same, abort message.");
                 setblocking(s, 1);
